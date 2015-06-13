@@ -39,4 +39,26 @@ public class Color {
 		ALPHA = alpha;
 	}
 	
+	@Override
+	public int hashCode() {
+		return hashCode(R, G, B, ALPHA);
+	}
+	
+	public static int hashCode(float r, float g, float b, float alpha) {
+		int rB = (byte) (r / 0xff) << 24;
+		int gB = (byte) (g / 0xff) << 16;
+		int bB = (byte) (b / 0xff) << 8;
+		int alphaB = (byte) (alpha / 0xff);
+		
+		return rB + gB + bB + alphaB;
+	}
+
+	public static Color valueOf(float r, float g, float b) {
+		return valueOf(r, g, b, 1);
+	}
+	
+	public static Color valueOf(float r, float g, float b, float alpha) {
+		return new Color(r, g, b, alpha);
+	}
+	
 }

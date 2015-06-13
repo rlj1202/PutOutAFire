@@ -138,7 +138,7 @@ public class FontModule {
 				
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fontImage.getWidth(), fontImage.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, GraphicHelper.getByteBuffer(fontImage));
 				
-				Logger.info("Font texture uploaded: " + fontName + " " + "0x" + Integer.toHexString(i) + " to " + storage + " storage." + "\"" + textureID + "\"");
+				Logger.info("Font texture uploaded: " + fontName + " of " + "0x" + Integer.toHexString(i) + " to \"" + storage + "\" storage. to \"" + textureID + "\"");
 			}
 			
 			/*

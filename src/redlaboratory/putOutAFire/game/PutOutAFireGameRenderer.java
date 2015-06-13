@@ -80,6 +80,14 @@ public class PutOutAFireGameRenderer implements Renderer {
 		FontModule.renderString("한글 랜더링 테스트 입니다.", 30, 20, 100, "Nanum");
 		FontModule.renderString("This is english rendering test.", 30, 20, 130, "Nanum");
 		FontModule.renderString("(ㅇㅅㅇ) 정말 완벽하게 멋져.", 30, 20, 160, "Nanum");
+		
+		{// Light blending
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			
+			render.drawQuad(490, 10, 100, 100, Color.valueOf(0.2f, 0, 0));
+			render.drawQuad(500, 10, 100, 100, Color.valueOf(0, 0.2f, 0));
+			render.drawQuad(510, 10, 100, 100, Color.valueOf(0, 0, 0.2f));
+		}
 	}
 
 }
