@@ -28,9 +28,6 @@ public class Player extends LivingEntity {
 		
 		items = new ArrayList<Item>();
 		itemOnHand = null;
-		
-		this.health = health;
-		this.maxHealth = maxHealth;
 	}
 	
 	public ArrayList<Item> getItems() {

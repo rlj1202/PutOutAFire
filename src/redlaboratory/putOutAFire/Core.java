@@ -1,7 +1,5 @@
 package redlaboratory.putOutAFire;
 
-import org.lwjgl.openal.AL10;
-
 import redlaboratory.putOutAFire.game.Game;
 import redlaboratory.putOutAFire.game.PutOutAFireGame;
 import redlaboratory.putOutAFire.graphics.Render;
@@ -48,7 +46,7 @@ public class Core {
 			curGame.tick();
 			render.drawGame(curGame);
 			
-			AL10.alListener3f(AL10.AL_POSITION, curGame.getViewEntity().getCenterX(), curGame.getViewEntity().getCenterY(), curGame.getViewEntity().getZ());
+			Main.setListenerPosition(curGame.getViewEntity().getCenterX(), curGame.getViewEntity().getCenterY(), curGame.getViewEntity().getZ());
 		}
 	}
 	

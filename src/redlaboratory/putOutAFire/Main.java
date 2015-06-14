@@ -9,6 +9,7 @@ import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
+import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
@@ -65,7 +66,7 @@ public class Main {
 		}
 		
 		initialize();
-		gameLoop();
+		mainLoop();
 		cleanUp();
 	}
 	
@@ -95,7 +96,7 @@ public class Main {
 		setMouseCursor(GraphicHelper.getBufferedImage("/redlaboratory/putOutAFire/resources/images/" + "mouseCursor.png"));
 	}
 	
-	private static void gameLoop() {
+	private static void mainLoop() {
 		int fps = 0;
 		long totalTime = 0;
 		
@@ -108,9 +109,7 @@ public class Main {
 			Display.update();
 			Display.sync(60);
 			
-			{
-				if (Display.wasResized()) Render.initialize();
-			}
+			if (Display.wasResized()) Render.initialize();
 			
 			{
 				long spendTime = System.nanoTime() - start;
@@ -200,6 +199,10 @@ public class Main {
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void setListenerPosition(float x, float y, float z) {
+		AL10.alListener3f(AL10.AL_POSITION, x, y, z);
 	}
 	
 }

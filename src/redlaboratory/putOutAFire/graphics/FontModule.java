@@ -10,6 +10,8 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import org.lwjgl.opengl.Display;
+
 import redlaboratory.putOutAFire.Logger;
 import redlaboratory.putOutAFire.utils.GraphicHelper;
 
@@ -153,6 +155,8 @@ public class FontModule {
 				}
 			}
 			 */
+			
+			Display.update();
 		}
 		
 		fontDatas.put(storage, new FontModule(fontName, textures, sizeRatios));
