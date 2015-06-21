@@ -1,9 +1,12 @@
 package redlaboratory.putOutAFire.entity;
 
+import java.util.List;
+
 import redlaboratory.putOutAFire.Map;
 import redlaboratory.putOutAFire.area.SquareArea;
 import redlaboratory.putOutAFire.audios.Audio;
 import redlaboratory.putOutAFire.audios.AudioClip;
+import redlaboratory.putOutAFire.game.Game;
 import redlaboratory.putOutAFire.graphics.Texture;
 
 public class Fire extends Entity {
@@ -12,8 +15,8 @@ public class Fire extends Entity {
 	
 	private AudioClip audio;
 	
-	public Fire(float size, float x, float y, float z, Map curMap) {
-		super(size, size, x, y, z, curMap, Texture.FIRE, true);
+	public Fire(float size, float x, float y, float z) {
+		super(size, size, x, y, z, Texture.FIRE, false, true);
 		
 		this.size = size;
 		audio = new AudioClip(Audio.TEST_SOUND, x, y, z, 1.0f, 1.0f, true);
@@ -57,19 +60,21 @@ public class Fire extends Entity {
 	}
 	
 	@Override
-	public void tick() {
+	public void tick(Game game, Map map) {
 		this.width = size;
 		this.height = size;
 		
-		SquareArea area = getArea();
+		List<Entity> interactingEntities = getInteractingEntities();
 		
-		for (Entity entity : curMap.getEntities()) {
-			if (entity.equals(this)) continue;
-			
+		if (interactingEntities == null) return;
+		
+		for (Entity entity : interactingEntities) {
 			if (entity instanceof LivingEntity) {
 				LivingEntity lentity = (LivingEntity) entity;
 				
+				SquareArea area = getArea();
 				SquareArea entityA = lentity.getArea();
+				
 				SquareArea inter = area.getIntersection(entityA);// Intersection
 				
 				if (inter != null) {// Collision detected
@@ -100,7 +105,6 @@ public class Fire extends Entity {
 					}
 					
 					lentity.setHealth(lentity.getHealth() - size);
-					lentity.setInteractingEntity(this);
 				}
 			}
 		}

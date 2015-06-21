@@ -3,6 +3,7 @@ package redlaboratory.putOutAFire.game;
 import java.util.ArrayList;
 
 import redlaboratory.putOutAFire.Camera;
+import redlaboratory.putOutAFire.Core;
 import redlaboratory.putOutAFire.Map;
 import redlaboratory.putOutAFire.entity.Entity;
 import redlaboratory.putOutAFire.graphics.Renderer;
@@ -35,6 +36,10 @@ abstract public class Game {
 		return renderers;
 	}
 	
+	public float[] getListenerPosition() {
+		return new float[] {viewEntity.getCenterX(), viewEntity.getCenterY(), viewEntity.getZ()};
+	}
+	
 	public void setMap(Map map) {
 		this.map = map;
 	}
@@ -60,6 +65,6 @@ abstract public class Game {
 		renderers = new ArrayList<Renderer>();
 	}
 	
-	abstract public void tick();
+	abstract public void tick(Core core);
 	
 }

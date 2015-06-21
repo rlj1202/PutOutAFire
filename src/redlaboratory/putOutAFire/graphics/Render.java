@@ -1,47 +1,11 @@
 package redlaboratory.putOutAFire.graphics;
 
-import static org.lwjgl.opengl.GL11.GL_ALPHA_TEST;
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_GREATER;
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_MODULATE;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.GL_REPLACE;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_ENV;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_ENV_MODE;
-import static org.lwjgl.opengl.GL11.glAlphaFunc;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glColor4f;
-import static org.lwjgl.opengl.GL11.glDepthMask;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glOrtho;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glTexEnvi;
-import static org.lwjgl.opengl.GL11.glTranslatef;
-import static org.lwjgl.opengl.GL11.glVertex2f;
-import static org.lwjgl.opengl.GL11.glVertex3f;
-import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.opengl.Display;
 
 import redlaboratory.putOutAFire.Block;
+import redlaboratory.putOutAFire.Core;
 import redlaboratory.putOutAFire.entity.Entity;
 import redlaboratory.putOutAFire.entity.LivingEntity;
 import redlaboratory.putOutAFire.entity.Particle;
@@ -63,131 +27,106 @@ public class Render {
 		glClearColor(0, 0, 0, 0);
 	}
 	
-	public void drawGame(Game game) {
-		if (game == null) return;
-		if (game.getMap() == null) return;
+	private void drawMap(Game game, Core core) {
+		int shadowZ = game.getMap().getHeight();
+		int shadowR = (Display.getWidth() > Display.getHeight()) ? (Display.getWidth()) : (Display.getHeight());
 		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glLoadIdentity();
-		
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GREATER, 0.1f); 
-		
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(true);
-		
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		
-		glPushMatrix();
-		{
-			for (Renderer renderer : game.getRenderers()) {
-				renderer.pre(this);
-			}
+		for (int z = 0; z < game.getMap().getHeight(); z++) {
+			int yStart = game.getCamera().Y >= 0 ? (int) (game.getCamera().Y / game.getCamera().ZOOM) : 0;
+			int yEnd = game.getCamera().Y + Display.getHeight() >= 0 ? (int) ((game.getCamera().Y + Display.getHeight()) / game.getCamera().ZOOM) : 0;
 			
-			glTranslatef(-game.getCamera().X, -game.getCamera().Y, 0);
-			
-			// Render: map
-			int shadowZ = game.getMap().getHeight();
-			int shadowR = (Display.getWidth() > Display.getHeight()) ? (Display.getWidth()) : (Display.getHeight());
-			
-			for (int z = 0; z < game.getMap().getHeight(); z++) {
-				int yStart = game.getCamera().Y >= 0 ? (int) (game.getCamera().Y / game.getCamera().ZOOM) : 0;
-				int yEnd = game.getCamera().Y + Display.getHeight() >= 0 ? (int) ((game.getCamera().Y + Display.getHeight()) / game.getCamera().ZOOM) : 0;
+			for (int y = yStart; y <= yEnd; y++) {
+				int xStart = game.getCamera().X >= 0 ? (int) (game.getCamera().X / game.getCamera().ZOOM) : 0;
+				int xEnd = game.getCamera().X + Display.getWidth() >= 0 ? (int) ((game.getCamera().X + Display.getWidth()) / game.getCamera().ZOOM) : 0;
 				
-				for (int y = yStart; y <= yEnd; y++) {
-					int xStart = game.getCamera().X >= 0 ? (int) (game.getCamera().X / game.getCamera().ZOOM) : 0;
-					int xEnd = game.getCamera().X + Display.getWidth() >= 0 ? (int) ((game.getCamera().X + Display.getWidth()) / game.getCamera().ZOOM) : 0;
+				for (int x = xStart; x <= xEnd; x++) {
+					// Render: blocks
+					Block block = game.getMap().getBlock(x, y, z);
 					
-					for (int x = xStart; x <= xEnd; x++) {
-						// Render: blocks
-						Block block = game.getMap().getBlock(x, y, z);
-						
-						if (block == null) continue;
-						
-						int dX = game.getCamera().ZOOM * x;// Display
-						int dY = game.getCamera().ZOOM * y;
-						
-						drawQuad(dX, dY, z, game.getCamera().ZOOM, game.getCamera().ZOOM, block.getTexture());
-						
-						// Render: shadow
-						if (game.getViewEntity() != null) {
-							if (!block.isThroughable()) {
-								glDisable(GL_TEXTURE_2D);
-								glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-								glBegin(GL_QUADS);
-								{
-									float pcx = game.getCamera().ZOOM * game.getViewEntity().getCenterX();// Player display center x
-									float pcy = game.getCamera().ZOOM * game.getViewEntity().getCenterY();// Player display center y
-									
-									// Left
-									double angle1 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
-									double angle2 = Math.atan2(y     - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
-									glVertex3f(dX, dY, shadowZ);
-									glVertex3f(dX, dY + game.getCamera().ZOOM, shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle1) * shadowR), pcy + (float) (Math.sin(angle1) * shadowR), shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle2) * shadowR), pcy + (float) (Math.sin(angle2) * shadowR), shadowZ);
-									
-									// Right
-									double angle3 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
-									double angle4 = Math.atan2(y     - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
-									glVertex3f(dX + game.getCamera().ZOOM, dY, shadowZ);
-									glVertex3f(dX + game.getCamera().ZOOM, dY + game.getCamera().ZOOM, shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle3) * shadowR), pcy + (float) (Math.sin(angle3) * shadowR), shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle4) * shadowR), pcy + (float) (Math.sin(angle4) * shadowR), shadowZ);
-									
-									// Up
-									double angle5 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
-									double angle6 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
-									glVertex3f(dX, dY + game.getCamera().ZOOM, shadowZ);
-									glVertex3f(dX + game.getCamera().ZOOM, dY + game.getCamera().ZOOM, shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle6) * shadowR), pcy + (float) (Math.sin(angle6) * shadowR), shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle5) * shadowR), pcy + (float) (Math.sin(angle5) * shadowR), shadowZ);
-									
-									// Down
-									double angle7 = Math.atan2(y     - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
-									double angle8 = Math.atan2(y     - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
-									glVertex3f(dX, dY, shadowZ);
-									glVertex3f(dX + game.getCamera().ZOOM, dY, shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle8) * shadowR), pcy + (float) (Math.sin(angle8) * shadowR), shadowZ);
-									glVertex3f(pcx + (float) (Math.cos(angle7) * shadowR), pcy + (float) (Math.sin(angle7) * shadowR), shadowZ);
-								}
-								glEnd();
+					if (block == null) continue;
+					
+					int dX = game.getCamera().ZOOM * x;// Display
+					int dY = game.getCamera().ZOOM * y;
+					
+					drawQuad(dX, dY, z, game.getCamera().ZOOM, game.getCamera().ZOOM, block.getTexture());
+					
+					// Render: shadow
+					if (game.getViewEntity() != null) {
+						if (!block.isThroughable()) {
+							glDisable(GL_TEXTURE_2D);
+							glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+							glBegin(GL_QUADS);
+							{
+								float pcx = game.getCamera().ZOOM * game.getViewEntity().getCenterX();// Player display center x
+								float pcy = game.getCamera().ZOOM * game.getViewEntity().getCenterY();// Player display center y
+								
+								// Left
+								double angle1 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
+								double angle2 = Math.atan2(y     - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
+								glVertex3f(dX, dY, shadowZ);
+								glVertex3f(dX, dY + game.getCamera().ZOOM, shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle1) * shadowR), pcy + (float) (Math.sin(angle1) * shadowR), shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle2) * shadowR), pcy + (float) (Math.sin(angle2) * shadowR), shadowZ);
+								
+								// Right
+								double angle3 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
+								double angle4 = Math.atan2(y     - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
+								glVertex3f(dX + game.getCamera().ZOOM, dY, shadowZ);
+								glVertex3f(dX + game.getCamera().ZOOM, dY + game.getCamera().ZOOM, shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle3) * shadowR), pcy + (float) (Math.sin(angle3) * shadowR), shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle4) * shadowR), pcy + (float) (Math.sin(angle4) * shadowR), shadowZ);
+								
+								// Up
+								double angle5 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
+								double angle6 = Math.atan2(y + 1 - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
+								glVertex3f(dX, dY + game.getCamera().ZOOM, shadowZ);
+								glVertex3f(dX + game.getCamera().ZOOM, dY + game.getCamera().ZOOM, shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle6) * shadowR), pcy + (float) (Math.sin(angle6) * shadowR), shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle5) * shadowR), pcy + (float) (Math.sin(angle5) * shadowR), shadowZ);
+								
+								// Down
+								double angle7 = Math.atan2(y     - game.getViewEntity().getCenterY(), x     - game.getViewEntity().getCenterX());
+								double angle8 = Math.atan2(y     - game.getViewEntity().getCenterY(), x + 1 - game.getViewEntity().getCenterX());
+								glVertex3f(dX, dY, shadowZ);
+								glVertex3f(dX + game.getCamera().ZOOM, dY, shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle8) * shadowR), pcy + (float) (Math.sin(angle8) * shadowR), shadowZ);
+								glVertex3f(pcx + (float) (Math.cos(angle7) * shadowR), pcy + (float) (Math.sin(angle7) * shadowR), shadowZ);
 							}
+							glEnd();
 						}
 					}
 				}
 			}
+		}
+	}
+	
+	private void drawEntities(Game game, Core core) {
+		for (Entity entity : game.getMap().getEntities()) {
+			if (entity instanceof Particle) {
+				Particle particle = (Particle) entity;
+				drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), particle.getColor());
+				
+				continue;
+			}
 			
-			// Render: entities
-			for (Entity entity : game.getMap().getEntities()) {
-				if (entity instanceof Particle) {
-					Particle particle = (Particle) entity;
-					drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), particle.getColor());
-					continue;
-				}
+			drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), entity.getTexture());
+			
+			if (entity instanceof Player) {
+				Player player = (Player) entity;
+				Item item = player.getItemOnHand();
 				
-				drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), entity.getTexture());
-				
-				if (entity instanceof Player) {
-					Player player = (Player) entity;
-					Item item = player.getItemOnHand();
+				if (item != null) {
+					float x = player.getX() + player.getWidth() + item.getX();
+					float y = player.getY() + item.getY();
+					float z = player.getZ() + item.getZ();
 					
-					if (item != null) {
-						float x = player.getX() + player.getWidth() + item.getX();
-						float y = player.getY() + item.getY();
-						float z = player.getZ() + item.getZ();
-						
-						drawQuad(game.getCamera().ZOOM * x, game.getCamera().ZOOM * y, z, game.getCamera().ZOOM * item.getWidth(), game.getCamera().ZOOM * item.getHeight(), player.getItemOnHand().getTexture());
-					}
+					drawQuad(game.getCamera().ZOOM * x, game.getCamera().ZOOM * y, z, game.getCamera().ZOOM * item.getWidth(), game.getCamera().ZOOM * item.getHeight(), player.getItemOnHand().getTexture());
 				}
 			}
 		}
-		glPopMatrix();
-		
-		// Render: HUD: health
+	}
+	
+	private void drawHUDHealth(Game game, Core core) {
 		if (game.getViewEntity() instanceof LivingEntity) {
 			LivingEntity entity = (LivingEntity) game.getViewEntity();
 			
@@ -220,8 +159,9 @@ public class Render {
 			}
 			glPopMatrix();
 		}
-		
-		// Render: HUD: items
+	}
+	
+	private void drawHUDItems(Game game, Core core) {
 		if (game.getViewEntity() instanceof Player) {
 			Player player = (Player) game.getViewEntity();
 			
@@ -257,9 +197,44 @@ public class Render {
 				glPopMatrix();
 			}
 		}
+	}
+	
+	public void drawGame(Game game, Core core) {
+		if (game == null) return;
+		if (game.getMap() == null) return;
+		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glLoadIdentity();
+		
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.1f); 
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(true);
+		
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		
+		glPushMatrix();
+		{
+			for (Renderer renderer : game.getRenderers()) {
+				renderer.pre(game, core, this);
+			}
+			
+			glTranslatef(-game.getCamera().X, -game.getCamera().Y, 0);
+			
+			drawMap(game, core);
+			drawEntities(game, core);
+		}
+		glPopMatrix();
+		
+		drawHUDHealth(game, core);
+		drawHUDItems(game, core);
 		
 		for (Renderer renderer : game.getRenderers()) {
-			renderer.post(this);
+			renderer.post(game, core, this);
 		}
 	}
 	

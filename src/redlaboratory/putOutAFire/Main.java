@@ -14,6 +14,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
+import redlaboratory.putOutAFire.game.PutOutAFireGame;
 import redlaboratory.putOutAFire.graphics.FontModule;
 import redlaboratory.putOutAFire.graphics.Render;
 import redlaboratory.putOutAFire.graphics.Texture;
@@ -29,6 +30,8 @@ public class Main {
 	private static boolean antiAliasing = false;
 	private static int width = 800;
 	private static int height = 600;
+	
+	private static Core core;
 	
 	public static void main(String[] args) {
 		for (String str : args) {
@@ -65,15 +68,18 @@ public class Main {
 			}
 		}
 		
-		initialize();
-		mainLoop();
-		cleanUp();
+		doInitialize();
+		doMainLoop();
+		doCleanUp();
 	}
 	
-	private static void initialize() {
+	private static void doInitialize() {
 		setDisplayMode(width, height, fullScreen);
 		
 		try {
+//			Display.setDisplayMode(new DisplayMode(width, height));
+//			Display.setFullscreen(fullScreen);
+			
 			if (antiAliasing) Display.create(new PixelFormat(32, 8, 16, 1, 4));
 			else Display.create(new PixelFormat(32, 8, 16, 1, 0));
 			Keyboard.create();
@@ -90,21 +96,32 @@ public class Main {
 		Display.setTitle("Put out a fire!");
 		Display.setVSyncEnabled(vsync);
 		Display.setResizable(resizable);
+		
 		Render.initialize();
 		FontModule.initialize();
+		
+		core = new Core();
+		core.setCurrentGame(new PutOutAFireGame(), true);
 		
 		setMouseCursor(GraphicHelper.getBufferedImage("/redlaboratory/putOutAFire/resources/images/" + "mouseCursor.png"));
 	}
 	
-	private static void mainLoop() {
+	private static void doMainLoop() {
 		int fps = 0;
 		long totalTime = 0;
+		float[] listenerPos;
 		
 		while (!Display.isCloseRequested()) {
 			long start = System.nanoTime();
-			Core.tick();
-			Texture.tick();
-			Core.FPS_2 = 1000000000.0f / (System.nanoTime() - start);
+			
+			{
+				core.tick();
+				listenerPos = core.getListenerPosition();
+				AL10.alListener3f(AL10.AL_POSITION, listenerPos[0], listenerPos[1], listenerPos[2]);
+				Texture.tick();
+			}
+			
+			core.FPS_2 = 1000000000.0f / (System.nanoTime() - start);
 			
 			Display.update();
 			Display.sync(60);
@@ -118,7 +135,7 @@ public class Main {
 				totalTime += spendTime;
 				
 				if (totalTime >= 1000000000) {
-					Core.FPS_1 = fps;
+					core.FPS_1 = fps;
 					
 					totalTime = 0;
 					fps = 0;
@@ -127,7 +144,7 @@ public class Main {
 		}
 	}
 	
-	private static void cleanUp() {
+	private static void doCleanUp() {
 		Display.destroy();
 		Keyboard.destroy();
 		Mouse.destroy();
@@ -141,7 +158,7 @@ public class Main {
 	 * @param height The height of the display required
 	 * @param fullscreen True if we want fullscreen mode
 	 */
-	public static void setDisplayMode(int width, int height, boolean fullscreen) {
+	private static void setDisplayMode(int width, int height, boolean fullscreen) {
 		// return if requested DisplayMode is already set
 		if ((Display.getDisplayMode().getWidth() == width) && 
 				(Display.getDisplayMode().getHeight() == height) &&
@@ -193,16 +210,12 @@ public class Main {
 		}
 	}
 	
-	public static void setMouseCursor(BufferedImage image) {
+	private static void setMouseCursor(BufferedImage image) {
 		try {
 			Mouse.setNativeCursor(new Cursor(image.getWidth(), image.getHeight(), 0, image.getHeight() - 1, 1, GraphicHelper.getIntBuffer(image), null));
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static void setListenerPosition(float x, float y, float z) {
-		AL10.alListener3f(AL10.AL_POSITION, x, y, z);
 	}
 	
 }

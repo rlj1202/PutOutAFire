@@ -1,39 +1,40 @@
 package redlaboratory.putOutAFire.entity;
 
-import java.util.Iterator;
+import java.util.List;
 
 import redlaboratory.putOutAFire.Map;
+import redlaboratory.putOutAFire.game.Game;
 import redlaboratory.putOutAFire.graphics.Color;
 
-public class FireExtinguisherParticle extends PhysicsParticle {
+public class FireExtinguisherParticle extends Particle {
 
-	public FireExtinguisherParticle(float x, float y, float z, float xS, float yS, int aliveTicks, Map curMap) {
-		super(x, y, z, xS, yS, 0, 0.05f, Color.WHITE, aliveTicks, curMap);
+	public FireExtinguisherParticle(float x, float y, float z, float xS, float yS, int aliveTicks) {
+		super(x, y, z, xS, yS, 0, true, 0.05f, Color.WHITE, aliveTicks);
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
+	public void tick(Game game, Map map) {
+		super.tick(game, map);
 		
-		for (Iterator<Entity> it = curMap.getEntities().iterator(); it.hasNext();) {
-			Entity entity = it.next();
-			
+		List<Entity> interactingEntities = getInteractingEntities();
+		
+		if (interactingEntities == null) return;
+		
+		for (Entity entity : interactingEntities) {
 			if (entity instanceof Fire) {
 				Fire fire = (Fire) entity;
 				
-				if (getArea().isCollided(fire.getArea())) {
-					float cX = fire.getCenterX();
-					
-					fire.setSize(fire.getSize() - 0.0001f);
-					fire.setCenterX(cX);
-					
-					if (fire.getSize() < 0.5f) {
-						it.remove();
-						fire.getAudioClip().stop();
-					}
+				float centerX = fire.getCenterX();
+				
+				fire.setSize(fire.getSize() - 0.0001f);
+				fire.setCenterX(centerX);
+				
+				if (fire.getSize() < 0.5f) {
+					map.removeEntity(fire);
+					fire.getAudioClip().stop();
 				}
 			}
 		}
 	}
-
+	
 }

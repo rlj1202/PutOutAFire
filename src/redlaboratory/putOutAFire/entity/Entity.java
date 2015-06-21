@@ -1,12 +1,14 @@
 package redlaboratory.putOutAFire.entity;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import redlaboratory.putOutAFire.Map;
 import redlaboratory.putOutAFire.area.SquareArea;
+import redlaboratory.putOutAFire.game.Game;
 import redlaboratory.putOutAFire.graphics.Texture;
 
 abstract public class Entity {
-	
-	protected Map curMap;
 	
 	protected float width;
 	protected float height;
@@ -15,11 +17,22 @@ abstract public class Entity {
 	protected float y;
 	protected float z;
 	
+	protected float xS;
+	protected float yS;
+	protected float zS;
+	
 	private Texture texture;
 	
+	protected boolean physicsable;
 	protected boolean throughable;
 	
-	public Entity(float width, float height, float x, float y, float z, Map curMap, Texture texture, boolean throughable) {
+	protected List<Entity> interactingEntities;
+	
+	public Entity(float width, float height, float x, float y, float z, Texture texture, boolean physicsable, boolean throughable) {
+		this(width, height, x, y, z, 0, 0, 0, texture, physicsable, throughable);
+	}
+	
+	public Entity(float width, float height, float x, float y, float z, float xS, float yS, float zS, Texture texture, boolean physicsable, boolean throughable) {
 		this.width = width;
 		this.height = height;
 		
@@ -27,11 +40,16 @@ abstract public class Entity {
 		this.y = y;
 		this.z = z;
 		
-		this.curMap = curMap;
+		this.xS = xS;
+		this.yS = yS;
+		this.zS = zS;
 		
 		this.texture = texture;
 		
+		this.physicsable = physicsable;
 		this.throughable = throughable;
+		
+		interactingEntities = new LinkedList<Entity>();
 	}
 	
 	public float getWidth() {
@@ -62,16 +80,32 @@ abstract public class Entity {
 		return y + (height / 2);
 	}
 	
+	public float getXS() {
+		return xS;
+	}
+	
+	public float getYS() {
+		return yS;
+	}
+	
+	public float getZS() {
+		return zS;
+	}
+	
+	public List<Entity> getInteractingEntities() {
+		return interactingEntities;
+	}
+
 	public Texture getTexture() {
 		return texture;
 	}
 	
-	public Map getCurrentMap() {
-		return curMap;
-	}
-	
 	public SquareArea getArea() {
 		return new SquareArea(x, y, width, height);
+	}
+	
+	public boolean isPhysicsable() {
+		return physicsable;
 	}
 	
 	public boolean isThroughable() {
@@ -98,14 +132,22 @@ abstract public class Entity {
 		this.y = y - height / 2;
 	}
 	
+	public void setXS(float xS) {
+		this.xS = xS;
+	}
+	
+	public void setYS(float yS) {
+		this.yS = yS;
+	}
+	
+	public void setZS(float zS) {
+		this.zS = zS;
+	}
+	
 	public void setTexture(Texture texture) {
 		this.texture = texture;
 	}
 	
-	public void setCurrentMap(Map curMap) {
-		this.curMap = curMap;
-	}
-	
-	abstract public void tick();
+	abstract public void tick(Game game, Map map);
 	
 }

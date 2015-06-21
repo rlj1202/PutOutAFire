@@ -2,6 +2,8 @@ package redlaboratory.putOutAFire.game;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.util.List;
+
 import org.lwjgl.opengl.Display;
 
 import redlaboratory.putOutAFire.Core;
@@ -18,15 +20,13 @@ import redlaboratory.putOutAFire.utils.SubtitleManager;
 
 public class PutOutAFireGameRenderer implements Renderer {
 	
-	private Game game;
 	private Player player;
 	private SubtitleManager subtitleManager;
 	
 	private int fadeInTicksWhenGameStart;
 	private int fireDamageEffectTicks;
 	
-	public PutOutAFireGameRenderer(Game game, Player player) {
-		this.game = game;
+	public PutOutAFireGameRenderer(Player player) {
 		this.player = player;
 		
 		subtitleManager = new SubtitleManager();
@@ -40,12 +40,16 @@ public class PutOutAFireGameRenderer implements Renderer {
 	}
 	
 	@Override
-	public void pre(Render render) {
-		Entity interactingEntity = player.getInteractingEntity();
+	public void pre(Game game, Core core, Render render) {
+		List<Entity> interactingEntities = player.getInteractingEntities();
 		
-		if (interactingEntity != null) {
-			if (interactingEntity instanceof Fire) {
-				fireDamageEffectTicks = 60;
+		if (interactingEntities != null) {
+			for (Entity entity : interactingEntities) {
+				if (entity instanceof Fire) {
+					fireDamageEffectTicks = 60;
+					
+					break;
+				}
 			}
 		}
 		
@@ -53,21 +57,25 @@ public class PutOutAFireGameRenderer implements Renderer {
 	}
 	
 	@Override
-	public void post(Render render) {
-		render.drawText(16, Display.getHeight() - 32, 16, Color.WHITE, Core.FPS_1 + " fps", TextRenderAttribute.LEFT);
-		render.drawText(16, Display.getHeight() - 48, 16, Color.WHITE, Core.FPS_2 + " fps", TextRenderAttribute.LEFT);
+	public void post(Game game, Core core, Render render) {
+		render.drawText(16, Display.getHeight() - 32, 16, Color.WHITE, core.FPS_1 + " fps", TextRenderAttribute.LEFT);
+		render.drawText(16, Display.getHeight() - 48, 16, Color.WHITE, core.FPS_2 + " fps", TextRenderAttribute.LEFT);
 		render.drawText(16, Display.getHeight() - 64, 16, Color.WHITE, Display.getWidth() + " * " + Display.getHeight(), TextRenderAttribute.LEFT);
 		
 		subtitleManager.tick(render);
 		
-		Entity interactingEntity = player.getInteractingEntity();
+		List<Entity> interactingEntities = player.getInteractingEntities();
 		
-		if (interactingEntity != null) {
-			if (interactingEntity instanceof ConsumableEntity) {
-				render.drawText(Display.getWidth() / 2, Display.getHeight() / 2 - player.getHeight() * game.getCamera().ZOOM,
-						16, Color.WHITE, "Press F to get", TextRenderAttribute.CENTER);
-				render.drawText(Display.getWidth() / 2, Display.getHeight() / 2 - player.getHeight() * game.getCamera().ZOOM - 16,
-						16, Color.WHITE, interactingEntity.getClass().getSimpleName(), TextRenderAttribute.CENTER);
+		if (interactingEntities != null) {
+			for (Entity entity : interactingEntities) {
+				if (entity instanceof ConsumableEntity) {
+					render.drawText(Display.getWidth() / 2, Display.getHeight() / 2 - player.getHeight() * game.getCamera().ZOOM,
+							16, Color.WHITE, "Press F to get", TextRenderAttribute.CENTER);
+					render.drawText(Display.getWidth() / 2, Display.getHeight() / 2 - player.getHeight() * game.getCamera().ZOOM - 16,
+							16, Color.WHITE, entity.getClass().getSimpleName(), TextRenderAttribute.CENTER);
+					
+					break;
+				}
 			}
 		}
 		

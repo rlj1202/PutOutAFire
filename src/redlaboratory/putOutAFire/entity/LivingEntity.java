@@ -1,19 +1,16 @@
 package redlaboratory.putOutAFire.entity;
 
-import redlaboratory.putOutAFire.Map;
 import redlaboratory.putOutAFire.graphics.Texture;
 
-abstract public class LivingEntity extends MovingEntity {
+abstract public class LivingEntity extends Entity {
 	
 	protected int noDamageTick;
 	
 	protected float health;
 	protected float maxHealth;
 	
-	protected Entity interactingEntity;
-	
-	public LivingEntity(float width, float height, float x, float y, float z, float xS, float yS, float zS, float health, float maxHealth, Map curMap, Texture texture, boolean throughable) {
-		super(width, height, x, y, z, xS, yS, zS, curMap, texture, throughable);
+	public LivingEntity(float width, float height, float x, float y, float z, float xS, float yS, float zS, float health, float maxHealth, Texture texture, boolean throughable) {
+		super(width, height, x, y, z, xS, yS, zS, texture, true, throughable);
 		
 		this.health = health;
 		this.maxHealth = maxHealth;
@@ -29,10 +26,6 @@ abstract public class LivingEntity extends MovingEntity {
 	
 	public int getNoDamageTick() {
 		return noDamageTick;
-	}
-	
-	public Entity getInteractingEntity() {
-		return interactingEntity;
 	}
 	
 	public void setHealth(float health) {
@@ -52,10 +45,6 @@ abstract public class LivingEntity extends MovingEntity {
 	
 	public void setNoDamageTick(int noDamageTick) {
 		this.noDamageTick = noDamageTick;
-	}
-	
-	public void setInteractingEntity(Entity entity) {
-		interactingEntity = entity;
 	}
 	
 }

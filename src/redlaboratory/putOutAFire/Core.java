@@ -1,52 +1,37 @@
 package redlaboratory.putOutAFire;
 
 import redlaboratory.putOutAFire.game.Game;
-import redlaboratory.putOutAFire.game.PutOutAFireGame;
 import redlaboratory.putOutAFire.graphics.Render;
 
 public class Core {
 	
-	public static int FPS_1 = 0;
-	public static float FPS_2 = 0.0f;
+	public int FPS_1 = 0;
+	public float FPS_2 = 0.0f;
 	
-	private static Game curGame;
-	private static GameState state;
+	private Game curGame;
+	private Render render;
 	
-	private static Render render;
-	
-	static {
-		curGame = new PutOutAFireGame();
-		curGame.initialize();
-		
-		state = GameState.IN_GAME;
-		
+	public Core() {
 		render = new Render();
 	}
 	
-	public static Game getCurrentGame() {
+	public Game getCurrentGame() {
 		return curGame;
 	}
 	
-	public static GameState getGameState() {
-		return state;
+	public float[] getListenerPosition() {
+		return curGame.getListenerPosition();
 	}
 	
-	public static void setCurrentGame(Game curGame) {
-		Core.curGame = curGame;
+	public void setCurrentGame(Game curGame, boolean initialize) {
+		this.curGame = curGame;
+		if (initialize) curGame.initialize();
 	}
 	
-	public static void setGameState(GameState state) {
-		Core.state = state;
-	}
-	
-	public static void tick() {
-		if (state.equals(GameState.MAIN_MENU)) {
-			
-		} else if (state.equals(GameState.IN_GAME)) {
-			curGame.tick();
-			render.drawGame(curGame);
-			
-			Main.setListenerPosition(curGame.getViewEntity().getCenterX(), curGame.getViewEntity().getCenterY(), curGame.getViewEntity().getZ());
+	public void tick() {
+		if (curGame != null) {
+			curGame.tick(this);
+			render.drawGame(curGame, this);
 		}
 	}
 	
