@@ -17,7 +17,8 @@ abstract public class Game {
 	private ArrayList<Renderer> renderers;
 	
 	public Game() {
-		initialize();
+		camera = new Camera();
+		renderers = new ArrayList<Renderer>();
 	}
 	
 	public Map getMap() {
@@ -60,10 +61,7 @@ abstract public class Game {
 		renderers.add(renderer);
 	}
 	
-	public void initialize() {
-		camera = new Camera();
-		renderers = new ArrayList<Renderer>();
-	}
+	abstract public void initialize();
 	
 	abstract public void tick(Core core);
 	

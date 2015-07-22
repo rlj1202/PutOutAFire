@@ -5,7 +5,6 @@ import java.util.List;
 import redlaboratory.putOutAFire.Map;
 import redlaboratory.putOutAFire.area.SquareArea;
 import redlaboratory.putOutAFire.audios.Audio;
-import redlaboratory.putOutAFire.audios.AudioClip;
 import redlaboratory.putOutAFire.game.Game;
 import redlaboratory.putOutAFire.graphics.Texture;
 
@@ -13,14 +12,15 @@ public class Fire extends Entity {
 	
 	private float size;
 	
-	private AudioClip audio;
+	private Audio audio = null;
 	
 	public Fire(float size, float x, float y, float z) {
 		super(size, size, x, y, z, Texture.FIRE, false, true);
 		
 		this.size = size;
-		audio = new AudioClip(Audio.TEST_SOUND, x, y, z, 1.0f, 1.0f, true);
-		audio.play();
+		
+		audio = new Audio(Audio.TEST_SOUND, getCenterX(), getCenterY(), z, 1.0f, 1.0f);
+		audio.play(true);
 	}
 	
 	@Override
@@ -55,15 +55,12 @@ public class Fire extends Entity {
 		this.height = size;
 	}
 	
-	public AudioClip getAudioClip() {
+	public Audio getAudio() {
 		return audio;
 	}
 	
 	@Override
 	public void tick(Game game, Map map) {
-		this.width = size;
-		this.height = size;
-		
 		List<Entity> interactingEntities = getInteractingEntities();
 		
 		if (interactingEntities == null) return;

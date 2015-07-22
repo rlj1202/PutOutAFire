@@ -9,11 +9,11 @@ import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
-import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
+import redlaboratory.putOutAFire.audios.Audio;
 import redlaboratory.putOutAFire.game.PutOutAFireGame;
 import redlaboratory.putOutAFire.graphics.FontModule;
 import redlaboratory.putOutAFire.graphics.Render;
@@ -97,6 +97,7 @@ public class Main {
 		Display.setVSyncEnabled(vsync);
 		Display.setResizable(resizable);
 		
+		Audio.initialize();
 		Render.initialize();
 		FontModule.initialize();
 		
@@ -109,17 +110,13 @@ public class Main {
 	private static void doMainLoop() {
 		int fps = 0;
 		long totalTime = 0;
-		float[] listenerPos;
 		
 		while (!Display.isCloseRequested()) {
 			long start = System.nanoTime();
 			
-			{
-				core.tick();
-				listenerPos = core.getListenerPosition();
-				AL10.alListener3f(AL10.AL_POSITION, listenerPos[0], listenerPos[1], listenerPos[2]);
-				Texture.tick();
-			}
+			core.tick();
+			Audio.tick(core);
+			Texture.tick();
 			
 			core.FPS_2 = 1000000000.0f / (System.nanoTime() - start);
 			

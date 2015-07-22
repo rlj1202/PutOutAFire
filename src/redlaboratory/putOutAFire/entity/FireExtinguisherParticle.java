@@ -31,7 +31,7 @@ public class FireExtinguisherParticle extends Particle {
 				
 				if (fire.getSize() < 0.5f) {
 					map.removeEntity(fire);
-					fire.getAudioClip().stop();
+					fire.getAudio().destroy();
 				}
 			}
 		}

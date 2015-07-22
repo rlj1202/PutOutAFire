@@ -24,7 +24,7 @@ public class PutOutAFireGame extends Game {
 	
 	@Override
 	public void initialize() {
-		super.initialize();
+		getRenderers().clear();
 		
 		round_1 = new Map(20, 20, 2);
 		player = new Player(1, 1, 0.5f, 100.0f, 100.0f);
@@ -56,7 +56,17 @@ public class PutOutAFireGame extends Game {
 	
 	@Override
 	public void tick(Core core) {
-		getMap().tick(this);
+//		{
+//			int i = 0;
+//			String str = "";
+//			while (Keyboard.next()) {
+//				i++;
+//				
+//				str += Keyboard.getEventKey() + " " + Keyboard.getEventCharacter() + " " + Keyboard.getEventKeyState() + ", ";
+//			}
+//			
+//			if (i != 0) System.out.println(str);
+//		}
 		
 		{
 			List<Entity> interactingEntities = player.getInteractingEntities();
