@@ -1,6 +1,9 @@
 package redlaboratory.putOutAFire.game;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_ONE;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glTranslatef;
 
 import java.util.List;
 
@@ -82,19 +85,22 @@ public class PutOutAFireGameRenderer implements Renderer {
 		if (fireDamageEffectTicks > 0) fireDamageEffectTicks--;
 		if (fadeInTicksWhenGameStart > 0) fadeInTicksWhenGameStart--;
 		
-		render.drawQuad(0, 0, 0, Display.getWidth(), Display.getHeight(), new Color(1.0f, 0.0f, 0.0f, fireDamageEffectTicks * 0.7f / 60));
-		render.drawQuad(0, 0, 0, Display.getWidth(), Display.getHeight(), new Color(0.0f, 0.0f, 0.0f, fadeInTicksWhenGameStart * 1.0f / 120));
+		render.drawQuad(0, 0, 0, Display.getWidth(), Display.getHeight(), new Color(1.0f, 0.0f, 0.0f, fireDamageEffectTicks * 0.7f / 60), false);
+		render.drawQuad(0, 0, 0, Display.getWidth(), Display.getHeight(), new Color(0.0f, 0.0f, 0.0f, fadeInTicksWhenGameStart * 1.0f / 120), false);
 		
 		FontModule.renderString("한글 랜더링 테스트 입니다.", 30, 20, 100, "Nanum");
 		FontModule.renderString("This is english rendering test.", 30, 20, 130, "Nanum");
 		FontModule.renderString("(ㅇㅅㅇ) 정말 완벽하게 멋져.", 30, 20, 160, "Nanum");
 		
-		{// Light blending
+		{// Light blending test
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 			
-			render.drawQuad(490, 10, 100, 100, Color.valueOf(0.2f, 0, 0));
-			render.drawQuad(500, 10, 100, 100, Color.valueOf(0, 0.2f, 0));
-			render.drawQuad(510, 10, 100, 100, Color.valueOf(0, 0, 0.2f));
+			render.drawQuad(490, 10, 0, 100, 100, Color.valueOf(0.2f, 0, 0), false);
+			render.drawQuad(500, 10, 0, 100, 100, Color.valueOf(0, 0.2f, 0), false);
+			render.drawQuad(510, 10, 0, 100, 100, Color.valueOf(0, 0, 0.2f), false);
+			
+//			render.drawCircle(200, 300, 0, 100, Texture.CHAR_TEX, false);
+//			render.drawCircle(400, 400, 0, 100, true, 0, Color.valueOf(1, 1, 1, 0.5f), false);
 		}
 	}
 

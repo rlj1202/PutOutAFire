@@ -48,7 +48,7 @@ public class Render {
 					int dX = game.getCamera().ZOOM * x;// Display
 					int dY = game.getCamera().ZOOM * y;
 					
-					drawQuad(dX, dY, z, game.getCamera().ZOOM, game.getCamera().ZOOM, block.getTexture());
+					drawQuad(dX, dY, z, game.getCamera().ZOOM, game.getCamera().ZOOM, block.getTexture(), true);
 					
 					// Render: shadow
 					if (game.getViewEntity() != null) {
@@ -104,12 +104,12 @@ public class Render {
 		for (Entity entity : game.getMap().getEntities()) {
 			if (entity instanceof Particle) {
 				Particle particle = (Particle) entity;
-				drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), particle.getColor());
+				drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), particle.getColor(), true);
 				
 				continue;
 			}
 			
-			drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), entity.getTexture());
+			drawQuad(game.getCamera().ZOOM * entity.getX(), game.getCamera().ZOOM * entity.getY(), entity.getZ(), game.getCamera().ZOOM * entity.getWidth(), game.getCamera().ZOOM * entity.getHeight(), entity.getTexture(), true);
 			
 			if (entity instanceof Player) {
 				Player player = (Player) entity;
@@ -120,7 +120,7 @@ public class Render {
 					float y = player.getY() + item.getY();
 					float z = player.getZ() + item.getZ();
 					
-					drawQuad(game.getCamera().ZOOM * x, game.getCamera().ZOOM * y, z, game.getCamera().ZOOM * item.getWidth(), game.getCamera().ZOOM * item.getHeight(), player.getItemOnHand().getTexture());
+					drawQuad(game.getCamera().ZOOM * x, game.getCamera().ZOOM * y, z, game.getCamera().ZOOM * item.getWidth(), game.getCamera().ZOOM * item.getHeight(), player.getItemOnHand().getTexture(), true);
 				}
 			}
 		}
@@ -215,7 +215,8 @@ public class Render {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(true);
 		
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		
 		glPushMatrix();
 		{
@@ -227,6 +228,8 @@ public class Render {
 			
 			drawMap(game, core);
 			drawEntities(game, core);
+			
+			
 		}
 		glPopMatrix();
 		
@@ -254,9 +257,8 @@ public class Render {
 		}
 		
 		glEnable(GL_TEXTURE_2D);
-		glColor4f(color.R, color.G, color.B, color.ALPHA);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glBindTexture(GL_TEXTURE_2D, Texture.FONT.getTextureID());
+		glColor4f(color.R, color.G, color.B, color.ALPHA);
 		
 		glPushMatrix();
 		{
@@ -809,9 +811,13 @@ public class Render {
 		glPopMatrix();
 	}
 	
-	public void drawQuad(float x, float y, float z, float width, float height, Texture texture) {
+	public void drawQuad(float x, float y, float z, float width, float height, Texture texture, boolean depthTest) {
 		glEnable(GL_TEXTURE_2D);
+		if (depthTest) glEnable(GL_DEPTH_TEST);
+		else glDisable(GL_DEPTH_TEST);
 		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+		glColor4f(1, 1, 1, 1);
+		
 		glBegin(GL_QUADS);
 		{
 			glTexCoord2f(0, 1); glVertex3f(x, y, z);
@@ -822,8 +828,10 @@ public class Render {
 		glEnd();
 	}
 	
-	public void drawQuad(float x, float y, float z, float width, float height, Color color) {
+	public void drawQuad(float x, float y, float z, float width, float height, Color color, boolean depthTest) {
 		glDisable(GL_TEXTURE_2D);
+		if (depthTest) glEnable(GL_DEPTH_TEST);
+		else glDisable(GL_DEPTH_TEST);
 		glColor4f(color.R, color.G, color.B, color.ALPHA);
 		glBegin(GL_QUADS);
 		{
@@ -835,19 +843,79 @@ public class Render {
 		glEnd();
 	}
 	
-	public void drawQuad(float x, float y, float width, float height, Color color) {
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		glColor4f(color.R, color.G, color.B, color.ALPHA);
-		glBegin(GL_QUADS);
+	public void drawCircle(float x, float y, float z, float radius, Texture texture, boolean depthTest) {
+		glEnable(GL_TEXTURE_2D);
+		if (depthTest) glEnable(GL_DEPTH_TEST);
+		else glDisable(GL_DEPTH_TEST);
+		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+		glColor4f(1, 1, 1, 1);
+		
 		{
-			glVertex2f(x, y);
-			glVertex2f(x, y + height);
-			glVertex2f(x + width, y + height);
-			glVertex2f(x + width, y);
+			glBegin(GL_TRIANGLES);
+			{
+				for (int i = 0; i < 360; i++) {
+					double radian1 = Math.toRadians(i);
+					double radian2 = Math.toRadians(i + 1);
+					
+					glTexCoord2f(0.5f, 0.5f);
+					glVertex3f(x, y, z);
+					
+					glTexCoord2f(
+							(float) (0.5 + Math.cos(radian1) * 0.5),
+							(float) (0.5 - Math.sin(radian1) * 0.5));
+					glVertex3f(
+							(float) (x + Math.cos(Math.toRadians(i)) * radius),
+							(float) (y + Math.sin(Math.toRadians(i)) * radius),
+							z);
+					
+					glTexCoord2f(
+							(float) (0.5 + Math.cos(radian2) * 0.5),
+							(float) (0.5 - Math.sin(radian2) * 0.5));
+					glVertex3f(
+							(float) (x + Math.cos(Math.toRadians(i + 1)) * radius),
+							(float) (y + Math.sin(Math.toRadians(i + 1)) * radius),
+							z);
+				}
+			}
+			glEnd();
 		}
-		glEnd();
-		glEnable(GL_DEPTH_TEST);
+	}
+	
+	public void drawCircle(float x, float y, float z, float radius, boolean fill, float thickness, Color color, boolean depthTest) {
+		glDisable(GL_TEXTURE_2D);
+		if (depthTest) glEnable(GL_DEPTH_TEST);
+		else glDisable(GL_DEPTH_TEST);
+		glColor4f(color.R, color.G, color.B, color.ALPHA);
+		
+		if (fill) {
+			glBegin(GL_TRIANGLE_FAN);
+			{
+				glVertex3f(x, y, z);
+//				glColor4f(0, 0, 0, 0);// If you apply this line, the circle would looks like a spot light.
+				for (int i = 0; i <= 360; i++) {
+					glVertex3f(
+							(float) (x + Math.cos(Math.toRadians(i)) * radius),
+							(float) (y + Math.sin(Math.toRadians(i)) * radius),
+							z);
+				}
+			}
+			glEnd();
+		} else {
+			glBegin(GL_QUAD_STRIP);
+			{
+				for (int i = 0; i <= 360; i++) {
+					glVertex3f(
+							(float) (x + Math.cos(Math.toRadians(i)) * (radius - thickness)),
+							(float) (y + Math.sin(Math.toRadians(i)) * (radius - thickness)),
+							z);
+					glVertex3f(
+							(float) (x + Math.cos(Math.toRadians(i)) * radius),
+							(float) (y + Math.sin(Math.toRadians(i)) * radius),
+							z);
+				}
+			}
+			glEnd();
+		}
 	}
 	
 	public void effectColor(Color color, int length) {
