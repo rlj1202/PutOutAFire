@@ -6,13 +6,11 @@ public class CreatureEvolve extends Game {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void tick(Core core) {
-		// TODO Auto-generated method stub
 		
 	}
 	
