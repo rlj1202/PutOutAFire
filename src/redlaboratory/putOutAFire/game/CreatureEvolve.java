@@ -15,7 +15,7 @@ public class CreatureEvolve extends Game {
 		// TODO Auto-generated method stub
 		
 	}
-//	
+	
 //	private Creature creatureA;
 //	private Creature creatureB;
 //	private int creatureAScore;
