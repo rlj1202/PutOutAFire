@@ -88,6 +88,7 @@ public class PutOutAFireGameRenderer implements Renderer {
 		render.drawQuad(0, 0, 0, Display.getWidth(), Display.getHeight(), new Color(1.0f, 0.0f, 0.0f, fireDamageEffectTicks * 0.7f / 60), false);
 		render.drawQuad(0, 0, 0, Display.getWidth(), Display.getHeight(), new Color(0.0f, 0.0f, 0.0f, fadeInTicksWhenGameStart * 1.0f / 120), false);
 		
+		render.setShaderTextureMode(true);
 		FontModule.renderString("한글 랜더링 테스트 입니다.", 30, 20, 100, "Nanum");
 		FontModule.renderString("This is english rendering test.", 30, 20, 130, "Nanum");
 		FontModule.renderString("(ㅇㅅㅇ) 정말 완벽하게 멋져.", 30, 20, 160, "Nanum");

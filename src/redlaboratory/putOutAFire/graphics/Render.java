@@ -1,6 +1,8 @@
 package redlaboratory.putOutAFire.graphics;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL20.*;
 
 import org.lwjgl.opengl.Display;
 
@@ -11,10 +13,16 @@ import redlaboratory.putOutAFire.entity.LivingEntity;
 import redlaboratory.putOutAFire.entity.Particle;
 import redlaboratory.putOutAFire.entity.Player;
 import redlaboratory.putOutAFire.game.Game;
+import redlaboratory.putOutAFire.graphics.glsl.Program;
+import redlaboratory.putOutAFire.graphics.glsl.Shader;
 import redlaboratory.putOutAFire.item.FireExtinguisher;
 import redlaboratory.putOutAFire.item.Item;
 
 public class Render {
+	
+	private static Program program;
+	private static Shader vertex;
+	private static Shader fragment;
 	
 	public static void initialize() {
 		glMatrixMode(GL_PROJECTION);
@@ -25,6 +33,16 @@ public class Render {
 		glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		
 		glClearColor(0, 0, 0, 0);
+		
+		program = new Program();
+		vertex = new Shader("example.vert");
+		fragment = new Shader("example.frag");
+		
+		program.attachShader(vertex);
+		program.attachShader(fragment);
+		program.link();
+		
+		program.use();
 	}
 	
 	private void drawMap(Game game, Core core) {
@@ -53,6 +71,8 @@ public class Render {
 					// Render: shadow
 					if (game.getViewEntity() != null) {
 						if (!block.isThroughable()) {
+							setShaderTextureMode(false);
+							
 							glDisable(GL_TEXTURE_2D);
 							glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 							glBegin(GL_QUADS);
@@ -255,6 +275,8 @@ public class Render {
 			
 			break;
 		}
+		
+		setShaderTextureMode(true);
 		
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, Texture.FONT.getTextureID());
@@ -812,10 +834,13 @@ public class Render {
 	}
 	
 	public void drawQuad(float x, float y, float z, float width, float height, Texture texture, boolean depthTest) {
+		setShaderTextureMode(true);
+		setShaderTexture(0, texture);
+		
 		glEnable(GL_TEXTURE_2D);
 		if (depthTest) glEnable(GL_DEPTH_TEST);
 		else glDisable(GL_DEPTH_TEST);
-		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+		
 		glColor4f(1, 1, 1, 1);
 		
 		glBegin(GL_QUADS);
@@ -829,6 +854,8 @@ public class Render {
 	}
 	
 	public void drawQuad(float x, float y, float z, float width, float height, Color color, boolean depthTest) {
+		setShaderTextureMode(false);
+		
 		glDisable(GL_TEXTURE_2D);
 		if (depthTest) glEnable(GL_DEPTH_TEST);
 		else glDisable(GL_DEPTH_TEST);
@@ -934,6 +961,19 @@ public class Render {
 			glEnd();
 		}
 		glPopMatrix();
+	}
+	
+	public void setShaderTexture(int index, Texture texture) {
+		int loc = glGetUniformLocation(program.getProgramID(), "texture0");
+		glUniform1i(loc, index);
+		glActiveTexture(GL_TEXTURE0 + index);
+		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+	}
+	
+	public void setShaderTextureMode(boolean bool) {
+		int loc;
+		loc = glGetUniformLocation(program.getProgramID(), "textureMode");
+		glUniform1i(loc, bool ? 1 : 0);
 	}
 	
 }
