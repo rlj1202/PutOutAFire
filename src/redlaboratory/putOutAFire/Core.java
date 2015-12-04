@@ -2,7 +2,6 @@ package redlaboratory.putOutAFire;
 
 import redlaboratory.putOutAFire.area.SquareArea;
 import redlaboratory.putOutAFire.entity.Entity;
-import redlaboratory.putOutAFire.game.CreatureEvolve;
 import redlaboratory.putOutAFire.game.Game;
 import redlaboratory.putOutAFire.graphics.Render;
 
